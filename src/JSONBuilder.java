@@ -1,4 +1,13 @@
+import java.io.File;
 
-public class JSONBuilder {
-
+class JSONBuilder {
+	private File file;
+	
+	private JSONBuilder(File file) {
+		this.file = file;
+	}
+	
+	protected static JSONBuilder getBuilder(File file) {
+		return new JSONBuilder(file);
+	}
 }

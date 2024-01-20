@@ -1,0 +1,11 @@
+"subble" = {
+	"name" : "unsubble",
+	"name" : "name2",
+	"intVal" : 31,
+	"boolVal" : true,
+	"arrayVal" : [31, true, "testing"],
+	"objectVal" : {
+		"subVal" : "test2",
+		"nullVal" : null
+	}
+}
