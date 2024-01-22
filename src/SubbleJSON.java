@@ -3,30 +3,30 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 
-public final class SubbleJSON implements Closeable {
+public final class SubbleJson implements Closeable {
 	private File targetFile;
-	private JSONParser parser;
-	private JSONBuilder builder;
+	private JsonParser parser;
+	private JsonBuilder builder;
 
-	public SubbleJSON(String path) {
-		targetFile = new File(path);
-		parser = JSONParser.getParser(targetFile);
-		builder = JSONBuilder.getBuilder(targetFile);
+	public SubbleJson(String path) {
+		this(new File(path));
 	}
 	
-	public SubbleJSON(Path path) {
-		targetFile = path.toFile();
+	public SubbleJson(Path path) {
+		this(path.toFile());
 	}
 	
-	public SubbleJSON(File file) {
+	public SubbleJson(File file) {
 		targetFile = file;
+		parser = JsonParser.getParser(targetFile);
+		builder = JsonBuilder.getBuilder(targetFile);
 	}
 	
-	public JSONParser getParser() {
+	public JsonParser getParser() {
 		return parser;
 	}
 	
-	public JSONBuilder getBuilder() {
+	public JsonBuilder getBuilder() {
 		return builder;
 	}
 

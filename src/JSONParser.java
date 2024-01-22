@@ -1,59 +1,106 @@
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-public class JSONParser {
-	private File file;
-	private FileInputStream reader;
+public class JsonParser {
+	private BufferedReader reader;
 	
-	private JSONParser(File file) {
-		this.file = file;
+	private JsonParser(File file) {
 		try {
-			reader = new FileInputStream(file);
-		} catch (FileNotFoundException e) {
+			reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 	
-	protected static JSONParser getParser(File file) {
-		return new JSONParser(file);
+	protected static JsonParser getParser(File file) {
+		return new JsonParser(file);
 	}
 	
 	protected void close() throws IOException {
 		reader.close();
 	}
-
-	public JSONObject getAsJSONObject() {
-		return new JSONObject();
+	
+	private void skipToValue() {
+		long index = 0L;
+		int nextInt = -1;
+		try {
+			reader.mark(0);
+			while ((nextInt = reader.read()) != -1) {
+				if (nextInt == '\s' || nextInt == '=' || nextInt == '{' || nextInt == ':')
+					index++;
+				else
+					break;
+			}
+			reader.reset();
+			reader.skip(index);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 	
-	public Optional<JSONObject> getObject(String key) {
+	private boolean jumpToStartIndexOfValue(String key) {
 		int nextInt = -1;
 		List<Byte> byteList = new ArrayList<>(); 
 		boolean isCloser = true;
 		try {
 			while ((nextInt = reader.read()) != -1) {
-				if (nextInt == JSONUtil.QUOTATION && (byteList.isEmpty() ||
-						byteList.get(byteList.size() - 1) != JSONUtil.BACK_SLASH)) {
+				if (nextInt == JsonUtil.QUOTATION && (byteList.isEmpty() ||
+						byteList.get(byteList.size() - 1) != JsonUtil.BACK_SLASH)) {
 					isCloser = !isCloser; 
 				}
 				if (isCloser) {
-					
+					if (JsonUtil.equalsKeyAndList(key, byteList)) {
+						skipToValue();
+						return true;
+					}
 					byteList.clear();
+					continue;
 				}
 				byteList.add((byte)nextInt);
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		if (byteList.isEmpty())
-			return Optional.empty();
-		
+		return false;
 	}
+	
+	public Optional<String> getString(String key) {
+		List<Byte> byteList = new ArrayList<>();
+		boolean isCloser = true;
+		try {
+			int nextInt = -1;
+			jumpToStartIndexOfValue(key);
+			while ((nextInt = reader.read()) != -1) {
+				if (nextInt == JsonUtil.QUOTATION && (byteList.isEmpty() ||
+						byteList.get(byteList.size() - 1) != JsonUtil.BACK_SLASH)) {
+					isCloser = !isCloser; 
+				}
+				if (isCloser) {
+					if (JsonUtil.isString(byteList))
+						break;
+					else {
+						jumpToStartIndexOfValue(key);
+						byteList.clear();
+					}
+				}
+				byteList.add((byte)nextInt);
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		if (!JsonUtil.isString(byteList))
+			return Optional.empty();
+		String val = JsonUtil.convertToString(byteList.subList(1, byteList.size()));
+		return Optional.of(val);
+	}
+
 }

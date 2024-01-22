@@ -5,14 +5,12 @@ public class Main {
 
 	public static void main(String[] args) {
 		File file = new File("test.json");
-		try (SubbleJSON json = new SubbleJSON(file)) {
-			JSONParser parser = json.getParser();
-			
-			JSONObject object = parser.getAsJSONObject();
+		SubbleJson json = new SubbleJson(file);
+		JsonParser parser = json.getParser();
+		System.out.println(parser.getString("tbag").get());
+		try {
+			json.close();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
-		
 	}
 }
