@@ -9,6 +9,8 @@ public final class JsonUtil {
 	static final char COMMA = ',';
 	static final char SQUARE_BRACKET_OPEN = '[';
 	static final char SQUARE_BRACKET_CLOSE = ']';
+	static final char CURLY_BRACKETS_OPEN = '{';
+	static final char CURLY_BRACKETS_CLOSE = '}';
 	
 	private JsonUtil() {	
 	}
@@ -27,6 +29,10 @@ public final class JsonUtil {
 	
 	static boolean isList(List<Byte> byteList) {
 		return !byteList.isEmpty() && byteList.get(0) == SQUARE_BRACKET_OPEN;
+	}
+	
+	static boolean isObject(List<Byte> byteList) {
+		return !byteList.isEmpty() && byteList.get(0) == CURLY_BRACKETS_OPEN;
 	}
 	
 	static boolean isNum(List<Byte> byteList) {
@@ -70,6 +76,18 @@ public final class JsonUtil {
 		return byteList.subList(startIndex, end);
 	}
 	
+	static Object getElementAsObject(List<Byte> byteList) {
+		if (isString(byteList)) 
+			return convertToString(byteList.subList(1, byteList.size() - 1));
+		else if (isNum(byteList)) 
+			return convertToNumber(byteList);
+		else if (isBoolean(byteList)) 
+			return convertToBoolean(byteList);
+		else if (isObject(byteList))
+			return convertToObject(byteList);
+		return null;
+	}
+	
 	static String convertToString(List<Byte> byteList) {
 		final StringBuilder sb = new StringBuilder();
 		byteList.forEach(x -> sb.append((char)x.intValue()));
@@ -86,16 +104,6 @@ public final class JsonUtil {
 		final StringBuilder sb = new StringBuilder();
 		byteList.forEach(x -> sb.append((char)x.intValue()));
 		return Boolean.valueOf(sb.toString());
-	}
-	
-	static Object getElementAsObject(List<Byte> byteList) {
-		if (isString(byteList)) 
-			return convertToString(byteList);
-		else if (isNum(byteList)) 
-			return convertToNumber(byteList);
-		else if (isBoolean(byteList)) 
-			return convertToBoolean(byteList);
-		return null;
 	}
 	
 	static List<Object> convertToList(List<Byte> byteList) {
@@ -118,6 +126,36 @@ public final class JsonUtil {
 			list.add(getElementAsObject(rawElement));
 		}
 		return list;
+	}
+	
+	static JsonObject convertToObject(List<Byte> byteList) {
+		JsonObject object = new JsonObject();
+		List<Byte> element = new ArrayList<>();
+		boolean isArray = false;
+		String key = null;
+		Object value = null;
+		for (byte b : byteList) {
+			if (b == SQUARE_BRACKET_OPEN || b == SQUARE_BRACKET_CLOSE)
+				isArray = !isArray;
+			if ((b == ':' || b == COMMA) && !isArray) {
+				List<Byte> rawElement = trim(element);
+				if (key == null)
+					key = convertToString(rawElement.subList(1, rawElement.size() - 1));
+				else 
+					value = getElementAsObject(rawElement);		
+				element.clear();
+			} else
+				element.add(b);
+			if (key != null && value != null) {
+				object.add(key, value);
+				key = null;
+				value = null;
+			}
+		}
+		element = trim(element);
+		value = getElementAsObject(element);
+		object.add(key, value);
+		return object;
 	}
 	
 }

@@ -42,7 +42,7 @@ public class JsonParser {
 		try {
 			reader.mark(0);
 			while ((nextInt = reader.read()) != -1) {
-				if (nextInt == '\s' || nextInt == '=' || nextInt == '{' || nextInt == ':')
+				if (nextInt == '\s' || nextInt == '=' /*|| nextInt == '{'*/ || nextInt == ':')
 					index++;
 				else
 					break;
@@ -92,9 +92,10 @@ public class JsonParser {
 					isCloser = !isCloser; 
 				}
 				if (isCloser) {
-					if (JsonUtil.isString(byteList))
-						break;
-					else {
+					if (JsonUtil.isString(byteList)) {
+						String val = JsonUtil.convertToString(byteList.subList(1, byteList.size()));
+						return Optional.of(val);
+					} else {
 						jumpToStartIndexOfValue(key);
 						byteList.clear();
 					}
@@ -104,10 +105,7 @@ public class JsonParser {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		if (!JsonUtil.isString(byteList))
-			return Optional.empty();
-		String val = JsonUtil.convertToString(byteList.subList(1, byteList.size()));
-		return Optional.of(val);
+		return Optional.empty();
 	}
 	
 	public Optional<Number> nextNumber(String key) {
@@ -184,6 +182,38 @@ public class JsonParser {
 					if (JsonUtil.isList(byteList)) {
 						List<?> list = JsonUtil.convertToList(byteList);
 						return Optional.of(list);
+					} else {
+						jumpToStartIndexOfValue(key);
+						byteList.clear();
+					}
+				}
+				byteList.add((byte)nextInt);
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return Optional.empty();
+	}
+	
+	public Optional<JsonObject> nextObject(String key) {
+		List<Byte> byteList = new ArrayList<>();
+		int scope = 0;
+		try {
+			int nextInt = -1;
+			jumpToStartIndexOfValue(key);
+			while ((nextInt = reader.read()) != -1) {
+				//System.out.println((char)nextInt);
+				if (nextInt == JsonUtil.CURLY_BRACKETS_OPEN) {
+					scope++; 
+				}
+				if (nextInt == JsonUtil.CURLY_BRACKETS_CLOSE) {
+					scope--;
+				}
+				if (scope == 0) {
+					if (JsonUtil.isObject(byteList)) {
+						JsonObject obj = JsonUtil.convertToObject(byteList.subList(1, byteList.size()));
+						obj.setName(key);
+						return Optional.of(obj);
 					} else {
 						jumpToStartIndexOfValue(key);
 						byteList.clear();

@@ -49,16 +49,27 @@ public class JsonObject {
 		return valueList;
 	}
 	
+	public void setName(String name) {
+		this.name = name;
+	}
+	
 	@Override
 	public String toString() {
-		StringBuilder sb = new StringBuilder(name + " = {");
-		for (LinkedList<JsonPair<String, ?>> pairs : map.values()) {
-			for (Iterator<JsonPair<String, ?>> pairIter = pairs.iterator(); pairIter.hasNext();) {
+		StringBuilder sb = new StringBuilder(name + ": {");
+		Iterator<String> keyIter = map.keySet().iterator();
+		while (keyIter.hasNext()) {
+			LinkedList<JsonPair<String, ?>> pairs = map.get(keyIter.next());
+			Iterator<JsonPair<String, ?>> pairIter = pairs.iterator();
+			while (pairIter.hasNext()) {				
 				JsonPair<String, ?> pair = pairIter.next();
-				sb.append(pair.getKey() + ": " + pair.getValue().toString());
+				sb.append(pair.getKey()).append(": ").append(pair.getValue().toString());
+				if (pairIter.hasNext())
+					sb.append(", ");
 			}
+			if (keyIter.hasNext())
+				sb.append(", ");
 		}
-		sb.append("\n}");
+		sb.append('}');
 		return sb.toString();
 	}
 	
