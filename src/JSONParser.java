@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.OptionalInt;
 
 public class JsonParser {
 	private BufferedReader reader;
@@ -73,7 +74,7 @@ public class JsonParser {
 		return false;
 	}
 	
-	public Optional<String> getString(String key) {
+	public Optional<String> nextString(String key) {
 		List<Byte> byteList = new ArrayList<>();
 		boolean isCloser = true;
 		try {
@@ -101,6 +102,33 @@ public class JsonParser {
 			return Optional.empty();
 		String val = JsonUtil.convertToString(byteList.subList(1, byteList.size()));
 		return Optional.of(val);
+	}
+	
+	public Optional<Number> nextNum(String key) {
+		List<Byte> byteList = new ArrayList<>();
+		boolean isCloser = false;
+		try {
+			int nextInt = -1;
+			jumpToStartIndexOfValue(key);
+			while ((nextInt = reader.read()) != -1) {
+				if (!JsonUtil.isNumeric(nextInt)) {
+					isCloser = !isCloser; 
+				}
+				if (isCloser) {
+					if (JsonUtil.isNum(byteList)) {
+						Number num = JsonUtil.convertToNumber(byteList);
+						return Optional.of(num);
+					} else {
+						jumpToStartIndexOfValue(key);
+						byteList.clear();
+					}
+				}
+				byteList.add((byte)nextInt);
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return Optional.empty();
 	}
 
 }

@@ -20,8 +20,22 @@ public final class JsonUtil {
 		return true;
 	}
 	
-	static boolean isNumeric(byte val) {
-		return val >= '0' && val <= '9';
+	static boolean isNum(List<Byte> byteList) {
+		for (byte c : byteList) {
+			if (!isNumeric(c))
+				return false;
+		}
+		return true;
+	}
+	
+	static boolean isNumeric(int val) {
+		return (val >= '0' && val <= '9') || val == '.';
+	}
+	
+	static Number convertToNumber(List<Byte> byteList) {
+		final StringBuilder sb = new StringBuilder();
+		byteList.forEach(x -> sb.append((char)x.intValue()));
+		return Double.parseDouble(sb.toString());
 	}
 	
 	static String convertToString(List<Byte> byteList) {
