@@ -83,7 +83,7 @@ public final class JsonUtil {
 			return convertToNumber(byteList);
 		else if (isBoolean(byteList)) 
 			return convertToBoolean(byteList);
-		else if (isObject(byteList))
+		else if (isObject(byteList)) 
 			return convertToObject(byteList);
 		return null;
 	}
@@ -132,17 +132,20 @@ public final class JsonUtil {
 		JsonObject object = new JsonObject();
 		List<Byte> element = new ArrayList<>();
 		boolean isArray = false;
+		boolean isString = false;
 		String key = null;
 		Object value = null;
 		for (byte b : byteList) {
+			if (b == QUOTATION)
+				isString = !isString;
 			if (b == SQUARE_BRACKET_OPEN || b == SQUARE_BRACKET_CLOSE)
 				isArray = !isArray;
-			if ((b == ':' || b == COMMA) && !isArray) {
+			if ((b == ':' || b == COMMA) && !isArray && !isString) {
 				List<Byte> rawElement = trim(element);
-				if (key == null)
+				if (key == null) 
 					key = convertToString(rawElement.subList(1, rawElement.size() - 1));
 				else 
-					value = getElementAsObject(rawElement);		
+					value = getElementAsObject(rawElement);
 				element.clear();
 			} else
 				element.add(b);
