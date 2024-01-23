@@ -7,10 +7,7 @@ public class Main {
 		File file = new File("test.json");
 		try (SubbleJson json = new SubbleJson(file)) {
 			JsonParser parser = json.getParser();
-			System.out.println(parser.nextBoolean("boolVal").get());
-			System.out.println(parser.nextBoolean("boolVal").get());
-			parser.resetCursor();
-			System.out.println(parser.nextBoolean("boolVal").get());
+			System.out.println(parser.nextList("arrayVal").get());
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

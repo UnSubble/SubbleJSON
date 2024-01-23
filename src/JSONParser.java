@@ -164,4 +164,37 @@ public class JsonParser {
 		return Optional.empty();
 	}
 
+	public Optional<List<?>> nextList(String key) {
+		List<Byte> byteList = new ArrayList<>();
+		boolean isCloser = true;
+		boolean isStr = false;
+		try {
+			int nextInt = -1;
+			jumpToStartIndexOfValue(key);
+			while ((nextInt = reader.read()) != -1) {
+				if (nextInt == JsonUtil.QUOTATION && 
+						byteList.get(byteList.size() - 1) != JsonUtil.BACK_SLASH) {
+					isStr = !isStr;
+				}
+				if (!isStr && (nextInt == JsonUtil.SQUARE_BRACKET_OPEN || 
+						nextInt == JsonUtil.SQUARE_BRACKET_CLOSE)) {
+					isCloser = !isCloser; 
+				}
+				if (isCloser) {
+					if (JsonUtil.isList(byteList)) {
+						List<?> list = JsonUtil.convertToList(byteList);
+						return Optional.of(list);
+					} else {
+						jumpToStartIndexOfValue(key);
+						byteList.clear();
+					}
+				}
+				byteList.add((byte)nextInt);
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return Optional.empty();
+	}
+	
 }

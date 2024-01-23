@@ -93,7 +93,7 @@ public class JsonObject {
 			if (getClass() != obj.getClass())
 				return false;
 			JsonPair<?, ?> other = (JsonPair<?,?>) obj;
-			return Objects.equals(key, other.key) && Objects.equals(value, other.value);
+			return key.equals(other.key) && value.equals(other.value);
 		}
 
 		@Override

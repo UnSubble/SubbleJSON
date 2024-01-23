@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 public final class JsonUtil {
@@ -5,6 +7,8 @@ public final class JsonUtil {
 	static final char QUOTATION = '"';
 	static final char BACK_SLASH = '\\';
 	static final char COMMA = ',';
+	static final char SQUARE_BRACKET_OPEN = '[';
+	static final char SQUARE_BRACKET_CLOSE = ']';
 	
 	private JsonUtil() {	
 	}
@@ -19,6 +23,10 @@ public final class JsonUtil {
 				return false;
 		}
 		return true;
+	}
+	
+	static boolean isList(List<Byte> byteList) {
+		return !byteList.isEmpty() && byteList.get(0) == SQUARE_BRACKET_OPEN;
 	}
 	
 	static boolean isNum(List<Byte> byteList) {
@@ -40,7 +48,26 @@ public final class JsonUtil {
 	}
 	
 	static boolean isString(List<Byte> byteList) {
-		return !byteList.isEmpty() && byteList.get(0) == JsonUtil.QUOTATION;
+		return !byteList.isEmpty() && byteList.get(0) == QUOTATION;
+	}
+	
+	static List<Byte> trim(List<Byte> byteList) {
+		int startIndex = 0;
+		int end = byteList.size();
+		for (byte b : byteList) {
+			if (b <= 32)
+				startIndex++;
+			else
+				break;
+		}
+		for (int i = end - 1; i >= 0; i--) {
+			byte b = byteList.get(i);
+			if (b <= 32)
+				end--;
+			else 
+				break;
+		}
+		return byteList.subList(startIndex, end);
 	}
 	
 	static String convertToString(List<Byte> byteList) {
@@ -59,6 +86,38 @@ public final class JsonUtil {
 		final StringBuilder sb = new StringBuilder();
 		byteList.forEach(x -> sb.append((char)x.intValue()));
 		return Boolean.valueOf(sb.toString());
+	}
+	
+	static Object getElementAsObject(List<Byte> byteList) {
+		if (isString(byteList)) 
+			return convertToString(byteList);
+		else if (isNum(byteList)) 
+			return convertToNumber(byteList);
+		else if (isBoolean(byteList)) 
+			return convertToBoolean(byteList);
+		return null;
+	}
+	
+	static List<Object> convertToList(List<Byte> byteList) {
+		List<Object> list = new ArrayList<>();
+		List<Byte> element = new ArrayList<>();
+		boolean isCloser = true;
+		for (int i = 1; i < byteList.size(); i++) {
+			byte b = byteList.get(i);
+			if (b == QUOTATION)
+				isCloser = !isCloser;
+			if (b == COMMA && isCloser) {
+				List<Byte> rawElement = trim(element);
+				list.add(getElementAsObject(rawElement));
+				element.clear();
+			} else
+				element.add(b);
+		}
+		if (!element.isEmpty()) {
+			List<Byte> rawElement = trim(element);
+			list.add(getElementAsObject(rawElement));
+		}
+		return list;
 	}
 	
 }

@@ -3,11 +3,12 @@
 	"name" : "bob",
 	"intVal" : 31,
 	"boolVal" : true,
-	"arrayVal" : [31, true, "testing"],
+	"arrayVal" : [31, true, 
+	"testing"],
 	"objectVal" : {
 		"subVal" : "test2",
 		"nullVal" : null
 	},
-	"boolVal" : false,
+	"true" : false,
 	"doubleVal" : 44.82687
 }
