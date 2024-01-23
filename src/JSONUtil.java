@@ -4,6 +4,7 @@ public final class JsonUtil {
 	
 	static final char QUOTATION = '"';
 	static final char BACK_SLASH = '\\';
+	static final char COMMA = ',';
 	
 	private JsonUtil() {	
 	}
@@ -28,14 +29,18 @@ public final class JsonUtil {
 		return true;
 	}
 	
+	static boolean isBoolean(List<Byte> byteList) {
+		final StringBuilder sb = new StringBuilder();
+		byteList.forEach(x -> sb.append((char)x.intValue()));
+		return sb.toString().equals("true") || sb.toString().equals("false");
+	}
+	
 	static boolean isNumeric(int val) {
 		return (val >= '0' && val <= '9') || val == '.';
 	}
 	
-	static Number convertToNumber(List<Byte> byteList) {
-		final StringBuilder sb = new StringBuilder();
-		byteList.forEach(x -> sb.append((char)x.intValue()));
-		return Double.parseDouble(sb.toString());
+	static boolean isString(List<Byte> byteList) {
+		return !byteList.isEmpty() && byteList.get(0) == JsonUtil.QUOTATION;
 	}
 	
 	static String convertToString(List<Byte> byteList) {
@@ -44,8 +49,16 @@ public final class JsonUtil {
 		return sb.toString();
 	}
 	
-	static boolean isString(List<Byte> byteList) {
-		return !byteList.isEmpty() && byteList.get(0) == JsonUtil.QUOTATION;
+	static Number convertToNumber(List<Byte> byteList) {
+		final StringBuilder sb = new StringBuilder();
+		byteList.forEach(x -> sb.append((char)x.intValue()));
+		return Double.parseDouble(sb.toString());
+	}
+	
+	static boolean convertToBoolean(List<Byte> byteList) {
+		final StringBuilder sb = new StringBuilder();
+		byteList.forEach(x -> sb.append((char)x.intValue()));
+		return Boolean.valueOf(sb.toString());
 	}
 	
 }

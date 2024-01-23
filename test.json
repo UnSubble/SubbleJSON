@@ -8,5 +8,6 @@
 		"subVal" : "test2",
 		"nullVal" : null
 	},
-	"name" : "deneme"
+	"boolVal" : false,
+	"doubleVal" : 44.82687
 }

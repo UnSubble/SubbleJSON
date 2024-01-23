@@ -12,10 +12,12 @@ import java.util.Optional;
 import java.util.OptionalInt;
 
 public class JsonParser {
+	private File file;
 	private BufferedReader reader;
 	
 	private JsonParser(File file) {
 		try {
+			this.file = file;
 			reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -28,6 +30,10 @@ public class JsonParser {
 	
 	protected void close() throws IOException {
 		reader.close();
+	}
+	
+	public void resetCursor() throws IOException {
+		reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
 	}
 	
 	private void skipToValue() {
@@ -104,7 +110,7 @@ public class JsonParser {
 		return Optional.of(val);
 	}
 	
-	public Optional<Number> nextNum(String key) {
+	public Optional<Number> nextNumber(String key) {
 		List<Byte> byteList = new ArrayList<>();
 		boolean isCloser = false;
 		try {
@@ -118,6 +124,33 @@ public class JsonParser {
 					if (JsonUtil.isNum(byteList)) {
 						Number num = JsonUtil.convertToNumber(byteList);
 						return Optional.of(num);
+					} else {
+						jumpToStartIndexOfValue(key);
+						byteList.clear();
+					}
+				}
+				byteList.add((byte)nextInt);
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return Optional.empty();
+	}
+	
+	public Optional<Boolean> nextBoolean(String key) {
+		List<Byte> byteList = new ArrayList<>();
+		boolean isCloser = false;
+		try {
+			int nextInt = -1;
+			jumpToStartIndexOfValue(key);
+			while ((nextInt = reader.read()) != -1) {
+				if (nextInt == JsonUtil.COMMA) {
+					isCloser = !isCloser; 
+				}
+				if (isCloser) {
+					if (JsonUtil.isBoolean(byteList)) {
+						boolean bool = JsonUtil.convertToBoolean(byteList);
+						return Optional.of(bool);
 					} else {
 						jumpToStartIndexOfValue(key);
 						byteList.clear();
