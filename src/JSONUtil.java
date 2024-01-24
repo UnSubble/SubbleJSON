@@ -67,7 +67,7 @@ public final class JsonUtil {
 		}
 		for (int i = end - 1; i >= 0; i--) {
 			byte b = byteList.get(i);
-			if (b <= 32 || b == CURLY_BRACKETS_CLOSE)
+			if (b <= 32)
 				end--;
 			else 
 				break;
@@ -77,7 +77,7 @@ public final class JsonUtil {
 	
 	static Object getElementAsObject(List<Byte> byteList) {
 		if (isObject(byteList)) 
-			return convertToObject(byteList.subList(1, byteList.size()));
+			return convertToObject(byteList.subList(1, byteList.size() - 1));
 		else if (isString(byteList)) 
 			return convertToString(byteList.subList(1, byteList.size() - 1));
 		else if (isNum(byteList)) 
@@ -85,7 +85,7 @@ public final class JsonUtil {
 		else if (isBoolean(byteList)) 
 			return convertToBoolean(byteList);
 		else if (isList(byteList))
-			return convertToList(byteList.subList(1, byteList.size() - 1));
+			return convertToList(byteList.subList(0, byteList.size() - 1));
 		return null;
 	}
 	
@@ -140,7 +140,7 @@ public final class JsonUtil {
 		byteList = trim(byteList);
 		JsonObject object = new JsonObject();
 		List<Byte> element = new ArrayList<>();
-		boolean isArray = false;
+		int isArray = 0;
 		boolean isString = false;
 		int scope = 0;
 		String key = null;
@@ -154,15 +154,18 @@ public final class JsonUtil {
 					scope++;
 				if (b == CURLY_BRACKETS_CLOSE) 
 					scope--;
-				if (b == SQUARE_BRACKET_OPEN || b == SQUARE_BRACKET_CLOSE)
-					isArray = b == SQUARE_BRACKET_OPEN;
+				if (b == SQUARE_BRACKET_OPEN)
+					isArray++;
+				if (b == SQUARE_BRACKET_CLOSE)
+					isArray--;
 			}
-			if ((b == ':' || b == COMMA) && !isArray && !isString && scope == 0) {
+			if ((b == ':' || b == COMMA) && isArray == 0 && !isString && scope == 0) {
 				List<Byte> rawElement = trim(element);
 				if (key == null) 
 					key = convertToString(rawElement.subList(1, rawElement.size() - 1));
 				else 
 					value = getElementAsObject(rawElement);
+				
 				element.clear();
 			} else
 				element.add(b);

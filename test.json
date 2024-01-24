@@ -1,11 +1,45 @@
 {
-  "isim": "John",
-  "soyisim": "Doe",
-  "meslek": "Software Engineer",
-  "ozellikler": {
-    "\"programcı\"": true,
-    "\"bilgisayar\"": true,
-    "\"kodlama_dilleri\"": ["C#", "JavaScript", "Python"]
+  "isim": "Ali",
+  "soyisim": "Yılmaz",
+  "dogum_tarihi": "1990-05-15",
+  "adres": {
+    "sehir": "İstanbul",
+    "ilce": "Kadıköy",
+    "posta_kodu": "34700"
   },
-  "yas": 30
+  "telefonlar": ["555-1234", "532-5678"],
+  "email": "ali.yilmaz@example.com",
+  "aktif": true,
+  "projeler": [
+    {
+      "proje_adi": "\"Web Uygulaması\"",
+      "tehlike_seviyesi": 3,
+      "ekibin_sorumluluklari": ["frontend", "backend"],
+      "takim_uyeleri": [
+        {
+          "isim": "Ayşe",
+          "gorev": "frontend developer"
+        },
+        {
+          "isim": "Mehmet",
+          "gorev": "backend developer"
+        }
+      ]
+    },
+    {
+      "proje_adi": "\"Mobil Uygulama\"",
+      "tehlike_seviyesi": 4,
+      "ekibin_sorumluluklari": ["iOS", "Android"],
+      "takim_uyeleri": [
+        {
+          "isim": "Zeynep",
+          "gorev": "iOS developer"
+        },
+        {
+          "isim": "Ahmet",
+          "gorev": "Android developer"
+        }
+      ]
+    }
+  ]
 }
