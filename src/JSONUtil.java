@@ -113,7 +113,7 @@ public final class JsonUtil {
 		int scope = 0;
 		for (int i = 1; i < byteList.size(); i++) {
 			byte b = byteList.get(i);
-			if (b == QUOTATION)
+			if (b == QUOTATION && byteList.get(i - 1) != BACK_SLASH)
 				isString = !isString;
 			if (!isString) {
 				if (b == CURLY_BRACKETS_OPEN)
@@ -144,8 +144,9 @@ public final class JsonUtil {
 		int scope = 0;
 		String key = null;
 		Object value = null;
-		for (byte b : byteList) {
-			if (b == QUOTATION)
+		for (int i = 0; i < byteList.size(); i++) {
+			byte b = byteList.get(i);
+			if (b == QUOTATION && (i == 0 || byteList.get(i - 1) == BACK_SLASH))
 				isString = !isString;
 			if (!isString) {
 				if (b == CURLY_BRACKETS_OPEN) 

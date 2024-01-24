@@ -202,7 +202,6 @@ public class JsonParser {
 			int nextInt = -1;
 			jumpToStartIndexOfValue(key);
 			while ((nextInt = reader.read()) != -1) {
-				//System.out.println((char)nextInt);
 				if (nextInt == JsonUtil.CURLY_BRACKETS_OPEN) {
 					scope++; 
 				}
