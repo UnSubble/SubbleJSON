@@ -68,7 +68,7 @@ public final class JsonUtil {
 		}
 		for (int i = end - 1; i >= 0; i--) {
 			byte b = byteList.get(i);
-			if (b <= 32)
+			if (b <= 32 || b == CURLY_BRACKETS_CLOSE)
 				end--;
 			else 
 				break;
@@ -77,14 +77,14 @@ public final class JsonUtil {
 	}
 	
 	static Object getElementAsObject(List<Byte> byteList) {
-		if (isString(byteList)) 
+		if (isObject(byteList)) 
+			return convertToObject(byteList.subList(1, byteList.size()));
+		else if (isString(byteList)) 
 			return convertToString(byteList.subList(1, byteList.size() - 1));
 		else if (isNum(byteList)) 
 			return convertToNumber(byteList);
 		else if (isBoolean(byteList)) 
 			return convertToBoolean(byteList);
-		else if (isObject(byteList)) 
-			return convertToObject(byteList);
 		return null;
 	}
 	
@@ -109,12 +109,19 @@ public final class JsonUtil {
 	static List<Object> convertToList(List<Byte> byteList) {
 		List<Object> list = new ArrayList<>();
 		List<Byte> element = new ArrayList<>();
-		boolean isCloser = true;
+		boolean isString = false;
+		int scope = 0;
 		for (int i = 1; i < byteList.size(); i++) {
 			byte b = byteList.get(i);
 			if (b == QUOTATION)
-				isCloser = !isCloser;
-			if (b == COMMA && isCloser) {
+				isString = !isString;
+			if (!isString) {
+				if (b == CURLY_BRACKETS_OPEN)
+					scope++;
+				else if (b == CURLY_BRACKETS_CLOSE)
+					scope--;
+			}
+			if (b == COMMA && !isString && scope == 0) {
 				List<Byte> rawElement = trim(element);
 				list.add(getElementAsObject(rawElement));
 				element.clear();
@@ -129,18 +136,26 @@ public final class JsonUtil {
 	}
 	
 	static JsonObject convertToObject(List<Byte> byteList) {
+		byteList = trim(byteList);
 		JsonObject object = new JsonObject();
 		List<Byte> element = new ArrayList<>();
 		boolean isArray = false;
 		boolean isString = false;
+		int scope = 0;
 		String key = null;
 		Object value = null;
 		for (byte b : byteList) {
 			if (b == QUOTATION)
 				isString = !isString;
-			if (b == SQUARE_BRACKET_OPEN || b == SQUARE_BRACKET_CLOSE)
-				isArray = !isArray;
-			if ((b == ':' || b == COMMA) && !isArray && !isString) {
+			if (!isString) {
+				if (b == CURLY_BRACKETS_OPEN) 
+					scope++;
+				if (b == CURLY_BRACKETS_CLOSE) 
+					scope--;
+				if (b == SQUARE_BRACKET_OPEN || b == SQUARE_BRACKET_CLOSE)
+					isArray = b == SQUARE_BRACKET_OPEN;
+			}
+			if ((b == ':' || b == COMMA) && !isArray && !isString && scope == 0) {
 				List<Byte> rawElement = trim(element);
 				if (key == null) 
 					key = convertToString(rawElement.subList(1, rawElement.size() - 1));

@@ -212,7 +212,6 @@ public class JsonParser {
 				if (scope == 0) {
 					if (JsonUtil.isObject(byteList)) {
 						JsonObject obj = JsonUtil.convertToObject(byteList.subList(1, byteList.size()));
-						obj.setName(key);
 						return Optional.of(obj);
 					} else {
 						jumpToStartIndexOfValue(key);

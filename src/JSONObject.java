@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.Objects;
 
 public class JsonObject {
-	private String name;
 	private Map<String, LinkedList<JsonPair<String, ?>>> map;
 	
 	public JsonObject() {
@@ -49,20 +48,16 @@ public class JsonObject {
 		return valueList;
 	}
 	
-	public void setName(String name) {
-		this.name = name;
-	}
-	
 	@Override
 	public String toString() {
-		StringBuilder sb = new StringBuilder(name + ": {");
+		StringBuilder sb = new StringBuilder("{");
 		Iterator<String> keyIter = map.keySet().iterator();
 		while (keyIter.hasNext()) {
 			LinkedList<JsonPair<String, ?>> pairs = map.get(keyIter.next());
 			Iterator<JsonPair<String, ?>> pairIter = pairs.iterator();
 			while (pairIter.hasNext()) {				
 				JsonPair<String, ?> pair = pairIter.next();
-				sb.append(pair.getKey()).append(": ").append(pair.getValue().toString());
+				sb.append(pair.getKey()).append("=").append(pair.getValue().toString());
 				if (pairIter.hasNext())
 					sb.append(", ");
 			}

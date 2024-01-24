@@ -1,5 +1,7 @@
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
+import java.util.Optional;
 
 public class Main {
 
@@ -7,9 +9,14 @@ public class Main {
 		File file = new File("test.json");
 		try (SubbleJson json = new SubbleJson(file)) {
 			JsonParser parser = json.getParser();
-			JsonObject obj = parser.nextObject("init-param").get();
-			obj.getValues().forEach(System.out::println);
-			
+			//List<?> s = parser.nextList("servlet").get();
+			//System.out.println(s);
+			//System.out.println(parser.nextObject("init-param").get());
+			Optional<List<?>> op = parser.nextList("options");
+			while (!op.isEmpty()) {
+				System.out.println(op.get());
+				op = parser.nextList("options");		
+			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
