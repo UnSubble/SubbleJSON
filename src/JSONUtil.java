@@ -1,5 +1,4 @@
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 public final class JsonUtil {
@@ -85,6 +84,8 @@ public final class JsonUtil {
 			return convertToNumber(byteList);
 		else if (isBoolean(byteList)) 
 			return convertToBoolean(byteList);
+		else if (isList(byteList))
+			return convertToList(byteList.subList(1, byteList.size() - 1));
 		return null;
 	}
 	
@@ -146,7 +147,7 @@ public final class JsonUtil {
 		Object value = null;
 		for (int i = 0; i < byteList.size(); i++) {
 			byte b = byteList.get(i);
-			if (b == QUOTATION && (i == 0 || byteList.get(i - 1) == BACK_SLASH))
+			if (b == QUOTATION && (i == 0 || byteList.get(i - 1) != BACK_SLASH))
 				isString = !isString;
 			if (!isString) {
 				if (b == CURLY_BRACKETS_OPEN) 

@@ -1,5 +1,11 @@
 {
-    "testt" : {
-        "test" : ["\"", "{\"fakeobject\":\"val\"}"]
-    }
+  "isim": "John",
+  "soyisim": "Doe",
+  "meslek": "Software Engineer",
+  "ozellikler": {
+    "\"programcı\"": true,
+    "\"bilgisayar\"": true,
+    "\"kodlama_dilleri\"": ["C#", "JavaScript", "Python"]
+  },
+  "yas": 30
 }

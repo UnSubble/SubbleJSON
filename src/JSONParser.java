@@ -1,15 +1,11 @@
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.OptionalInt;
 
 public class JsonParser {
 	private File file;
@@ -54,10 +50,12 @@ public class JsonParser {
 		}
 	}
 	
-	private boolean jumpToStartIndexOfValue(String key) {
+	private void jumpToStartIndexOfValue(String key) {
 		int nextInt = -1;
 		List<Byte> byteList = new ArrayList<>(); 
 		boolean isCloser = true;
+		if ("".equals(key))
+			return;
 		try {
 			while ((nextInt = reader.read()) != -1) {
 				if (nextInt == JsonUtil.QUOTATION && (byteList.isEmpty() ||
@@ -67,7 +65,7 @@ public class JsonParser {
 				if (isCloser) {
 					if (JsonUtil.equalsKeyAndList(key, byteList)) {
 						skipToValue();
-						return true;
+						return;
 					}
 					byteList.clear();
 					continue;
@@ -77,7 +75,7 @@ public class JsonParser {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		return false;
+		return;
 	}
 	
 	public Optional<String> nextString(String key) {
@@ -196,18 +194,18 @@ public class JsonParser {
 	}
 	
 	public Optional<JsonObject> nextObject(String key) {
+		if (key == null)
+			key = "";
 		List<Byte> byteList = new ArrayList<>();
 		int scope = 0;
 		try {
 			int nextInt = -1;
 			jumpToStartIndexOfValue(key);
 			while ((nextInt = reader.read()) != -1) {
-				if (nextInt == JsonUtil.CURLY_BRACKETS_OPEN) {
+				if (nextInt == JsonUtil.CURLY_BRACKETS_OPEN) 
 					scope++; 
-				}
-				if (nextInt == JsonUtil.CURLY_BRACKETS_CLOSE) {
+				if (nextInt == JsonUtil.CURLY_BRACKETS_CLOSE)
 					scope--;
-				}
 				if (scope == 0) {
 					if (JsonUtil.isObject(byteList)) {
 						JsonObject obj = JsonUtil.convertToObject(byteList.subList(1, byteList.size()));
