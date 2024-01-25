@@ -1,6 +1,5 @@
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
 
 public class Main {
 
@@ -9,10 +8,10 @@ public class Main {
 		try (SubbleJson json = new SubbleJson(file)) {
 			JsonBuilder builder = json.getBuilder();
 			JsonParser parser = json.getParser();
-			List<?> list = parser.nextList("projeler").get();
+			JsonObject obj = parser.nextObject(null).get();
 			builder.clearFile();
-			builder.writeList(null, list);
-			System.out.println();
+			builder.writeObject(obj);
+			System.out.println(obj);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

@@ -1,45 +1,36 @@
 {
   "isim": "Ali",
-  "soyisim": "Yılmaz",
+  "soyisim": "Y1lmaz",
   "dogum_tarihi": "1990-05-15",
   "adres": {
-    "sehir": "İstanbul",
-    "ilce": "Kadıköy",
-    "posta_kodu": "34700"
+    "sehir": "0stanbul",
+    "ilce": "Kad1k￶y",
+    "posta_kodu": "34700",
   },
-  "telefonlar": ["555-1234", "532-5678"],
+  "telefonlar": ["555-1234","532-5678",], 
   "email": "ali.yilmaz@example.com",
   "aktif": true,
-  "projeler": [
-    {
-      "proje_adi": "\"Web Uygulaması\"",
-      "tehlike_seviyesi": 3,
-      "ekibin_sorumluluklari": ["frontend", "backend"],
-      "takim_uyeleri": [
-        {
-          "isim": "Ayşe",
-          "gorev": "frontend developer"
-        },
-        {
-          "isim": "Mehmet",
-          "gorev": "backend developer"
-        }
-      ]
-    },
-    {
-      "proje_adi": "\"Mobil Uygulama\"",
-      "tehlike_seviyesi": 4,
-      "ekibin_sorumluluklari": ["iOS", "Android"],
-      "takim_uyeleri": [
-        {
-          "isim": "Zeynep",
-          "gorev": "iOS developer"
-        },
-        {
-          "isim": "Ahmet",
-          "gorev": "Android developer",
-        },
-      ]
-    }
-  ]
+  "projeler": [{
+     "proje_adi": "\"Web Uygulamas1\"",
+     "tehlike_seviyesi": 3.0,
+     "ekibin_sorumluluklari": ["frontend","backend",], 
+     "takim_uyeleri": [{
+        "isim": "Ay_e",
+        "gorev": "frontend developer",
+      },{
+        "isim": "Mehmet",
+        "gorev": "backend developer",
+      },], 
+   },{
+     "proje_adi": "\"Mobil Uygulama\"",
+     "tehlike_seviyesi": 4.0,
+     "ekibin_sorumluluklari": ["iOS","Android",], 
+     "takim_uyeleri": [{
+        "isim": "Zeynep",
+        "gorev": "iOS developer",
+      },{
+        "isim": "Ahmet",
+        "gorev": "Android developer",
+      },], 
+   },], 
 }

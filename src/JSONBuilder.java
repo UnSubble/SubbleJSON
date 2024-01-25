@@ -38,20 +38,26 @@ class JsonBuilder {
 	
 	private void writeKey(String key) throws IOException {
 		for (char c : key.toCharArray()) {
-			writer.write(c);
+			writer.append(c);
 		}
-		writer.write(':');
-		writer.write(' ');
+		writer.append(':');
+		writer.append(' ');
 	}
 	
 	private void writeValue(String value) throws IOException {
 		for (char c : value.toCharArray()) {
-			writer.write(c);
+			writer.append(c);
 		}
-		writer.write(JsonUtil.COMMA);
+		writer.append(JsonUtil.COMMA);
 	}
 	
-	public void writeString(String key, String value) {
+	private void writeSpaces(int space) throws IOException{
+		for (int i = 0; i < space; i++) {
+			writer.append(' ');
+		}
+	}
+	
+	private void writeString(String key, String value) {
 		try {
 			writeKey(key);
 			writeValue(value);
@@ -59,45 +65,65 @@ class JsonBuilder {
 		}
 	}
 	
-	public void writeObject(String key, JsonObject object) {
+	private void writeObject(String key, JsonObject object, boolean isMain, int space) {
 		List<String> keys = object.getKeys();
 		List<?> values = object.getValues();
 		try {
 			if (key != null)
-				writeKey(key);
+				writeKey(key);	
 			writer.append('{');
+			writer.append('\n');
 			for (int i = 0; i < keys.size(); i++) {
-				String k = keys.get(i);
+				writeSpaces(space);
+				String k = "\"" + keys.get(i) + "\"";
 				Object v = values.get(i);
 				if (v instanceof String) 
 					writeString(k, "\"" + v.toString() + "\"");
+				else if (v instanceof JsonObject)
+					writeObject(k, (JsonObject)v, false, space + 2);
+				else if (v instanceof List<?>)
+					writeList(k, (List<?>)v, false, space + 1);
 				else
 					writeString(k, v.toString());
+				writer.append('\n');
 			}
+			writeSpaces(space - 2);
 			writer.append('}');
-			writer.append(',');
+			if (!isMain)
+				writer.append(',');
 		} catch (IOException e) {
 		}
 	}
 	
-	public void writeList(String key, List<?> list) {
+	private void writeList(String key, List<?> list, boolean isMain, int space) {
 		try {
 			if (key != null)
 				writeKey(key);
-			writer.write('[');
+			writer.append('[');			
 			for (Object obj : list) {
 				if (obj instanceof String)
 					writeValue("\"" + obj.toString() + "\"");
 				else if (obj instanceof JsonObject)
-					writeObject(null, (JsonObject)obj);
+					writeObject(null, (JsonObject)obj, false, space + 2);
 				else if (obj instanceof List<?>)
-					writeList(null, (List<?>)obj);
+					writeList(null, (List<?>)obj, false, space + 1);
 				else
 					writeValue(obj.toString());
 			}
-			writer.write(']');
-			writer.write(',');
+			writer.append(']');
+			if (!isMain) {
+				writer.append(',');
+				writer.append(' ');
+			}
 		} catch (IOException e) {
 		}
+	}
+	
+	public void writeObject(JsonObject object) {
+		writeObject(null, object, true, 2);
+	}
+	
+	public void writeList(List<?> list) {
+		writeList(null, list, true, 0);
 	}
 }
