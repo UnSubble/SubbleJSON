@@ -58,13 +58,14 @@ public final class JsonUtil {
 	
 	static List<Byte> trim(List<Byte> byteList) {
 		int startIndex = 0;
-		int end = byteList.size();
 		for (byte b : byteList) {
 			if (b <= 32)
 				startIndex++;
 			else
 				break;
 		}
+		byteList = byteList.subList(startIndex, byteList.size());
+		int end = byteList.size();
 		for (int i = end - 1; i >= 0; i--) {
 			byte b = byteList.get(i);
 			if (b <= 32)
@@ -72,7 +73,7 @@ public final class JsonUtil {
 			else 
 				break;
 		}
-		return byteList.subList(startIndex, end);
+		return byteList.subList(0, end);
 	}
 	
 	static Object getElementAsObject(List<Byte> byteList) {
@@ -129,8 +130,8 @@ public final class JsonUtil {
 			} else
 				element.add(b);
 		}
-		if (!element.isEmpty()) {
-			List<Byte> rawElement = trim(element);
+		List<Byte> rawElement = trim(element);
+		if (!rawElement.isEmpty()) {
 			list.add(getElementAsObject(rawElement));
 		}
 		return list;
@@ -160,10 +161,10 @@ public final class JsonUtil {
 					isArray--;
 			}
 			if ((b == ':' || b == COMMA) && isArray == 0 && !isString && scope == 0) {
-				List<Byte> rawElement = trim(element);
-				if (key == null) 
+				List<Byte> rawElement = trim(element);	
+				if (key == null && !element.isEmpty()) 
 					key = convertToString(rawElement.subList(1, rawElement.size() - 1));
-				else 
+				else
 					value = getElementAsObject(rawElement);
 				
 				element.clear();
@@ -175,9 +176,11 @@ public final class JsonUtil {
 				value = null;
 			}
 		}
-		element = trim(element);
-		value = getElementAsObject(element);
-		object.add(key, value);
+		if (!element.isEmpty() && key != null) {
+			element = trim(element);
+			value = getElementAsObject(element);
+			object.add(key, value);
+		}
 		return object;
 	}
 	

@@ -33,6 +33,7 @@ public final class SubbleJson implements Closeable {
 	@Override
 	public void close() throws IOException {
 		parser.close();
+		builder.close();
 	}
 	
 }
