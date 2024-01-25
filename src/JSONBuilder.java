@@ -82,7 +82,7 @@ class JsonBuilder {
 				else if (v instanceof JsonObject)
 					writeObject(k, (JsonObject)v, false, space + 2);
 				else if (v instanceof List<?>)
-					writeList(k, (List<?>)v, false, space + 1);
+					writeList(k, (List<?>)v, false, space);
 				else
 					writeString(k, v.toString());
 				writer.append('\n');
@@ -106,7 +106,7 @@ class JsonBuilder {
 				else if (obj instanceof JsonObject)
 					writeObject(null, (JsonObject)obj, false, space + 2);
 				else if (obj instanceof List<?>)
-					writeList(null, (List<?>)obj, false, space + 1);
+					writeList(null, (List<?>)obj, false, space);
 				else
 					writeValue(obj.toString());
 			}
