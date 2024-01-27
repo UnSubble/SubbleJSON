@@ -44,11 +44,12 @@ class JsonBuilder {
 		writer.append(' ');
 	}
 	
-	private void writeValue(String value) throws IOException {
+	private void writeValue(String value, boolean isLast) throws IOException {
 		for (char c : value.toCharArray()) {
 			writer.append(c);
 		}
-		writer.append(JsonUtil.COMMA);
+		if (!isLast)
+			writer.append(JsonUtil.COMMA);
 	}
 	
 	private void writeSpaces(int space) throws IOException{
@@ -57,10 +58,10 @@ class JsonBuilder {
 		}
 	}
 	
-	private void writeString(String key, String value) {
+	private void writeString(String key, String value, boolean isLast) {
 		try {
 			writeKey(key);
-			writeValue(value);
+			writeValue(value, isLast);
 		} catch (IOException e) {
 		}
 	}
@@ -79,13 +80,13 @@ class JsonBuilder {
 				String k = "\"" + keys.get(i) + "\"";
 				Object v = values.get(i);
 				if (v instanceof String) 
-					writeString(k, "\"" + v.toString() + "\"");
+					writeString(k, "\"" + v.toString() + "\"", i == keys.size() - 1);
 				else if (v instanceof JsonObject) {
-					writeObject(k, (JsonObject)v, false, space + 4);
+					writeObject(k, (JsonObject)v, i == keys.size() - 1, space + 4);
 				} else if (v instanceof List<?>)
-					writeList(k, (List<?>)v, false, space);
+					writeList(k, (List<?>)v, i == keys.size() - 1, space);
 				else
-					writeString(k, v.toString());
+					writeString(k, v.toString(), i == keys.size() - 1);
 				writer.append('\n');
 			}
 			writeSpaces(space - 4);
@@ -102,21 +103,22 @@ class JsonBuilder {
 				writeKey(key);
 			writer.append('[');	
 			writeSpaces(1);
-			for (Object obj : list) {
+			for (int i = 0; i < list.size(); i++) {
+				Object obj = list.get(i);
 				if (obj instanceof String) {
-					writeValue("\"" + obj.toString() + "\"");
+					writeValue("\"" + obj.toString() + "\"", i == list.size() - 1);
 					writeSpaces(1);
 				} else if (obj instanceof JsonObject) {
 					writer.append('\n');
 					writeSpaces(space + 4);
-					writeObject(null, (JsonObject)obj, false, space + 4);
+					writeObject(null, (JsonObject)obj, i == list.size() - 1, space + 4);
 					writer.append('\n');
 					writeSpaces(space);
 				} else if (obj instanceof List<?>) {
-					writeList(null, (List<?>)obj, false, space);
+					writeList(null, (List<?>)obj, i == list.size() - 1, space);
 					writeSpaces(1);
 				} else {
-					writeValue(obj.toString());
+					writeValue(obj.toString(), i == list.size() - 1);
 					writeSpaces(1);
 				}
 			}
