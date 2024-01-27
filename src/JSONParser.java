@@ -162,8 +162,10 @@ public class JsonParser {
 
 	public Optional<List<?>> nextList(String key) {
 		List<Byte> byteList = new ArrayList<>();
-		boolean isCloser = true;
 		boolean isStr = false;
+		int scope = 0;
+		if (key == null)
+			key = "";
 		try {
 			int nextInt = -1;
 			jumpToStartIndexOfValue(key);
@@ -172,11 +174,13 @@ public class JsonParser {
 						byteList.get(byteList.size() - 1) != JsonUtil.BACK_SLASH) {
 					isStr = !isStr;
 				}
-				if (!isStr && (nextInt == JsonUtil.SQUARE_BRACKET_OPEN || 
-						nextInt == JsonUtil.SQUARE_BRACKET_CLOSE)) {
-					isCloser = !isCloser; 
+				if (!isStr) {
+					if (nextInt == JsonUtil.SQUARE_BRACKET_OPEN)
+						scope++;
+					if (nextInt == JsonUtil.SQUARE_BRACKET_CLOSE)
+						scope--;
 				}
-				if (isCloser) {
+				if (scope == 0) {
 					if (JsonUtil.isList(byteList)) {
 						List<?> list = JsonUtil.convertToList(byteList);
 						return Optional.of(list);
