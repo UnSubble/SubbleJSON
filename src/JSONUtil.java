@@ -14,43 +14,43 @@ public final class JsonUtil {
 	private JsonUtil() {	
 	}
 	
-	private static boolean isNull(List<Byte> byteList) {
+	private static boolean isNull(List<Integer> intList) {
 		final StringBuilder sb = new StringBuilder();
-		byteList.forEach(x -> sb.append((char)x.intValue()));
+		intList.forEach(x -> sb.append((char)x.intValue()));
 		return sb.toString().equals("null");
 	}
 	
-	static boolean equalsKeyAndList(String key, List<Byte> byteList) {
+	static boolean equalsKeyAndList(String key, List<Integer> intList) {
 		key = "\"" + key;
-		if (key.length() != byteList.size())
+		if (key.length() != intList.size())
 			return false;
 		byte[] keyArray = key.getBytes();
-		for (int i = 0; i < byteList.size(); i++) {
-			if (keyArray[i] != byteList.get(i))
+		for (int i = 0; i < intList.size(); i++) {
+			if (keyArray[i] != intList.get(i))
 				return false;
 		}
 		return true;
 	}
 	
-	static boolean isList(List<Byte> byteList) {
-		return !byteList.isEmpty() && byteList.get(0) == SQUARE_BRACKET_OPEN;
+	static boolean isList(List<Integer> intList) {
+		return !intList.isEmpty() && intList.get(0) == SQUARE_BRACKET_OPEN;
 	}
 	
-	static boolean isObject(List<Byte> byteList) {
-		return !byteList.isEmpty() && byteList.get(0) == CURLY_BRACKETS_OPEN;
+	static boolean isObject(List<Integer> intList) {
+		return !intList.isEmpty() && intList.get(0) == CURLY_BRACKETS_OPEN;
 	}
 	
-	static boolean isNum(List<Byte> byteList) {
-		for (byte c : byteList) {
+	static boolean isNum(List<Integer> intList) {
+		for (int c : intList) {
 			if (!isNumeric(c))
 				return false;
 		}
 		return true;
 	}
 	
-	static boolean isBoolean(List<Byte> byteList) {
+	static boolean isBoolean(List<Integer> intList) {
 		final StringBuilder sb = new StringBuilder();
-		byteList.forEach(x -> sb.append((char)x.intValue()));
+		intList.forEach(x -> sb.append((char)x.intValue()));
 		return sb.toString().equals("true") || sb.toString().equals("false");
 	}
 	
@@ -58,72 +58,72 @@ public final class JsonUtil {
 		return (val >= '0' && val <= '9') || val == '.' || val == 'e' || val == '-' || val == 'E';
 	}
 	
-	static boolean isString(List<Byte> byteList) {
-		return !byteList.isEmpty() && byteList.get(0) == QUOTATION;
+	static boolean isString(List<Integer> intList) {
+		return !intList.isEmpty() && intList.get(0) == QUOTATION;
 	}
 	
-	static List<Byte> trim(List<Byte> byteList) {
+	static List<Integer> trim(List<Integer> intList) {
 		int startIndex = 0;
-		for (byte b : byteList) {
+		for (int b : intList) {
 			if (b <= 32)
 				startIndex++;
 			else
 				break;
 		}
-		byteList = byteList.subList(startIndex, byteList.size());
-		int end = byteList.size();
+		intList = intList.subList(startIndex, intList.size());
+		int end = intList.size();
 		for (int i = end - 1; i >= 0; i--) {
-			byte b = byteList.get(i);
+			int b = intList.get(i);
 			if (b <= 32)
 				end--;
 			else 
 				break;
 		}
-		return byteList.subList(0, end);
+		return intList.subList(0, end);
 	}
 	
-	static Object getElementAsObject(List<Byte> byteList) {
-		if (isNull(byteList))
+	static Object getElementAsObject(List<Integer> intList) {
+		if (isNull(intList))
 			return null;
-		else if (isObject(byteList)) 
-			return convertToObject(byteList.subList(1, byteList.size() - 1));
-		else if (isString(byteList)) 
-			return convertToString(byteList.subList(1, byteList.size() - 1));
-		else if (isNum(byteList)) 
-			return convertToNumber(byteList);
-		else if (isBoolean(byteList)) 
-			return convertToBoolean(byteList);
-		else if (isList(byteList))
-			return convertToList(byteList.subList(0, byteList.size() - 1));
+		else if (isObject(intList)) 
+			return convertToObject(intList.subList(1, intList.size() - 1));
+		else if (isString(intList)) 
+			return convertToString(intList.subList(1, intList.size() - 1));
+		else if (isNum(intList)) 
+			return convertToNumber(intList);
+		else if (isBoolean(intList)) 
+			return convertToBoolean(intList);
+		else if (isList(intList))
+			return convertToList(intList.subList(0, intList.size() - 1));
 		return null;
 	}
 	
-	static String convertToString(List<Byte> byteList) {
+	static String convertToString(List<Integer> intList) {
 		final StringBuilder sb = new StringBuilder();
-		byteList.forEach(x -> sb.append((char)x.intValue()));
+		intList.forEach(x -> sb.append((char)x.intValue()));
 		return sb.toString();
 	}
 	
-	static Number convertToNumber(List<Byte> byteList) {
+	static Number convertToNumber(List<Integer> intList) {
 		final StringBuilder sb = new StringBuilder();
-		byteList.forEach(x -> sb.append((char)x.intValue()));
+		intList.forEach(x -> sb.append((char)x.intValue()));
 		return Double.parseDouble(sb.toString());
 	}
 	
-	static boolean convertToBoolean(List<Byte> byteList) {
+	static boolean convertToBoolean(List<Integer> intList) {
 		final StringBuilder sb = new StringBuilder();
-		byteList.forEach(x -> sb.append((char)x.intValue()));
+		intList.forEach(x -> sb.append((char)x.intValue()));
 		return Boolean.valueOf(sb.toString());
 	}
 	
-	static List<Object> convertToList(List<Byte> byteList) {
+	static List<Object> convertToList(List<Integer> intList) {
 		List<Object> list = new ArrayList<>();
-		List<Byte> element = new ArrayList<>();
+		List<Integer> element = new ArrayList<>();
 		boolean isString = false;
 		int scope = 0;
-		for (int i = 1; i < byteList.size(); i++) {
-			byte b = byteList.get(i);
-			if (b == QUOTATION && byteList.get(i - 1) != BACK_SLASH)
+		for (int i = 1; i < intList.size(); i++) {
+			int b = intList.get(i);
+			if (b == QUOTATION && intList.get(i - 1) != BACK_SLASH)
 				isString = !isString;
 			if (!isString) {
 				if (b == CURLY_BRACKETS_OPEN)
@@ -132,31 +132,31 @@ public final class JsonUtil {
 					scope--;
 			}
 			if (b == COMMA && !isString && scope == 0) {
-				List<Byte> rawElement = trim(element);
+				List<Integer> rawElement = trim(element);
 				list.add(getElementAsObject(rawElement));
 				element.clear();
 			} else
 				element.add(b);
 		}
-		List<Byte> rawElement = trim(element);
+		List<Integer> rawElement = trim(element);
 		if (!rawElement.isEmpty()) {
 			list.add(getElementAsObject(rawElement));
 		}
 		return list;
 	}
 	
-	static JsonObject convertToObject(List<Byte> byteList) {
-		byteList = trim(byteList);
+	static JsonObject convertToObject(List<Integer> intList) {
+		intList = trim(intList);
 		JsonObject object = new JsonObject();
-		List<Byte> element = new ArrayList<>();
+		List<Integer> element = new ArrayList<>();
 		int isArray = 0;
 		boolean isString = false;
 		int scope = 0;
 		String key = null;
 		Object value = new Object();
-		for (int i = 0; i < byteList.size(); i++) {
-			byte b = byteList.get(i);
-			if (b == QUOTATION && (i == 0 || byteList.get(i - 1) != BACK_SLASH))
+		for (int i = 0; i < intList.size(); i++) {
+			int b = intList.get(i);
+			if (b == QUOTATION && (i == 0 || intList.get(i - 1) != BACK_SLASH))
 				isString = !isString;
 			if (!isString) {
 				if (b == CURLY_BRACKETS_OPEN) 
@@ -169,7 +169,7 @@ public final class JsonUtil {
 					isArray--;
 			}
 			if ((b == ':' || b == COMMA) && isArray == 0 && !isString && scope == 0) {
-				List<Byte> rawElement = trim(element);	
+				List<Integer> rawElement = trim(element);	
 				if (b == ':' && !rawElement.isEmpty()) 
 					key = convertToString(rawElement.subList(1, rawElement.size() - 1));
 				else if (b == COMMA) {

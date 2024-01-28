@@ -5,23 +5,24 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.nio.charset.Charset;
 import java.util.List;
 
 class JsonBuilder {
 	private File file;
 	private BufferedWriter writer;
 	
-	private JsonBuilder(File file) {
+	private JsonBuilder(File file, Charset charset) {
 		this.file = file;
 		try {
-			writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file, true)));
+			writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file, true), charset));
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
 	}
 	
-	protected static JsonBuilder getBuilder(File file) {
-		return new JsonBuilder(file);
+	protected static JsonBuilder getBuilder(File file, Charset charset) {
+		return new JsonBuilder(file, charset);
 	}
 	
 	protected void close() throws IOException {

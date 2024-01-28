@@ -3,6 +3,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -11,17 +12,17 @@ public class JsonParser {
 	private File file;
 	private BufferedReader reader;
 	
-	private JsonParser(File file) {
+	private JsonParser(File file, Charset charset) {
 		try {
 			this.file = file;
-			reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
+			reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), charset));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 	
-	protected static JsonParser getParser(File file) {
-		return new JsonParser(file);
+	protected static JsonParser getParser(File file, Charset charset) {
+		return new JsonParser(file, charset);
 	}
 	
 	protected void close() throws IOException {
@@ -52,25 +53,25 @@ public class JsonParser {
 	
 	private void jumpToStartIndexOfValue(String key) {
 		int nextInt = -1;
-		List<Byte> byteList = new ArrayList<>(); 
+		List<Integer> intList = new ArrayList<>(); 
 		boolean isCloser = true;
 		if ("".equals(key))
 			return;
 		try {
 			while ((nextInt = reader.read()) != -1) {
-				if (nextInt == JsonUtil.QUOTATION && (byteList.isEmpty() ||
-						byteList.get(byteList.size() - 1) != JsonUtil.BACK_SLASH)) {
+				if (nextInt == JsonUtil.QUOTATION && (intList.isEmpty() ||
+						intList.get(intList.size() - 1) != JsonUtil.BACK_SLASH)) {
 					isCloser = !isCloser; 
 				}
 				if (isCloser) {
-					if (JsonUtil.equalsKeyAndList(key, byteList)) {
+					if (JsonUtil.equalsKeyAndList(key, intList)) {
 						skipToValue();
 						return;
 					}
-					byteList.clear();
+					intList.clear();
 					continue;
 				}
-				byteList.add((byte)nextInt);
+				intList.add(nextInt);
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -79,26 +80,26 @@ public class JsonParser {
 	}
 	
 	public Optional<String> nextString(String key) {
-		List<Byte> byteList = new ArrayList<>();
+		List<Integer> intList = new ArrayList<>();
 		boolean isCloser = true;
 		try {
 			int nextInt = -1;
 			jumpToStartIndexOfValue(key);
 			while ((nextInt = reader.read()) != -1) {
-				if (nextInt == JsonUtil.QUOTATION && (byteList.isEmpty() ||
-						byteList.get(byteList.size() - 1) != JsonUtil.BACK_SLASH)) {
+				if (nextInt == JsonUtil.QUOTATION && (intList.isEmpty() ||
+						intList.get(intList.size() - 1) != JsonUtil.BACK_SLASH)) {
 					isCloser = !isCloser; 
 				}
 				if (isCloser) {
-					if (JsonUtil.isString(byteList)) {
-						String val = JsonUtil.convertToString(byteList.subList(1, byteList.size()));
+					if (JsonUtil.isString(intList)) {
+						String val = JsonUtil.convertToString(intList.subList(1, intList.size()));
 						return Optional.of(val);
 					} else {
 						jumpToStartIndexOfValue(key);
-						byteList.clear();
+						intList.clear();
 					}
 				}
-				byteList.add((byte)nextInt);
+				intList.add(nextInt);
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -107,7 +108,7 @@ public class JsonParser {
 	}
 	
 	public Optional<Number> nextNumber(String key) {
-		List<Byte> byteList = new ArrayList<>();
+		List<Integer> intList = new ArrayList<>();
 		boolean isCloser = false;
 		try {
 			int nextInt = -1;
@@ -117,15 +118,15 @@ public class JsonParser {
 					isCloser = !isCloser; 
 				}
 				if (isCloser) {
-					if (JsonUtil.isNum(byteList)) {
-						Number num = JsonUtil.convertToNumber(byteList);
+					if (JsonUtil.isNum(intList)) {
+						Number num = JsonUtil.convertToNumber(intList);
 						return Optional.of(num);
 					} else {
 						jumpToStartIndexOfValue(key);
-						byteList.clear();
+						intList.clear();
 					}
 				}
-				byteList.add((byte)nextInt);
+				intList.add(nextInt);
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -134,7 +135,7 @@ public class JsonParser {
 	}
 	
 	public Optional<Boolean> nextBoolean(String key) {
-		List<Byte> byteList = new ArrayList<>();
+		List<Integer> intList = new ArrayList<>();
 		boolean isCloser = false;
 		try {
 			int nextInt = -1;
@@ -144,15 +145,15 @@ public class JsonParser {
 					isCloser = !isCloser; 
 				}
 				if (isCloser) {
-					if (JsonUtil.isBoolean(byteList)) {
-						boolean bool = JsonUtil.convertToBoolean(byteList);
+					if (JsonUtil.isBoolean(intList)) {
+						boolean bool = JsonUtil.convertToBoolean(intList);
 						return Optional.of(bool);
 					} else {
 						jumpToStartIndexOfValue(key);
-						byteList.clear();
+						intList.clear();
 					}
 				}
-				byteList.add((byte)nextInt);
+				intList.add(nextInt);
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -161,7 +162,7 @@ public class JsonParser {
 	}
 
 	public Optional<List<?>> nextList(String key) {
-		List<Byte> byteList = new ArrayList<>();
+		List<Integer> intList = new ArrayList<>();
 		boolean isStr = false;
 		int scope = 0;
 		if (key == null)
@@ -171,7 +172,7 @@ public class JsonParser {
 			jumpToStartIndexOfValue(key);
 			while ((nextInt = reader.read()) != -1) {
 				if (nextInt == JsonUtil.QUOTATION && 
-						byteList.get(byteList.size() - 1) != JsonUtil.BACK_SLASH) {
+						intList.get(intList.size() - 1) != JsonUtil.BACK_SLASH) {
 					isStr = !isStr;
 				}
 				if (!isStr) {
@@ -181,15 +182,15 @@ public class JsonParser {
 						scope--;
 				}
 				if (scope == 0) {
-					if (JsonUtil.isList(byteList)) {
-						List<?> list = JsonUtil.convertToList(byteList);
+					if (JsonUtil.isList(intList)) {
+						List<?> list = JsonUtil.convertToList(intList);
 						return Optional.of(list);
 					} else {
 						jumpToStartIndexOfValue(key);
-						byteList.clear();
+						intList.clear();
 					}
 				}
-				byteList.add((byte)nextInt);
+				intList.add(nextInt);
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -200,7 +201,7 @@ public class JsonParser {
 	public Optional<JsonObject> nextObject(String key) {
 		if (key == null)
 			key = "";
-		List<Byte> byteList = new ArrayList<>();
+		List<Integer> intList = new ArrayList<>();
 		int scope = 0;
 		try {
 			int nextInt = -1;
@@ -211,15 +212,15 @@ public class JsonParser {
 				if (nextInt == JsonUtil.CURLY_BRACKETS_CLOSE)
 					scope--;
 				if (scope == 0) {
-					if (JsonUtil.isObject(byteList)) {
-						JsonObject obj = JsonUtil.convertToObject(byteList.subList(1, byteList.size()));
+					if (JsonUtil.isObject(intList)) {
+						JsonObject obj = JsonUtil.convertToObject(intList.subList(1, intList.size()));
 						return Optional.of(obj);
 					} else {
 						jumpToStartIndexOfValue(key);
-						byteList.clear();
+						intList.clear();
 					}
 				}
-				byteList.add((byte)nextInt);
+				intList.add(nextInt);
 			}
 		} catch (IOException e) {
 			e.printStackTrace();

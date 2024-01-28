@@ -1,12 +1,13 @@
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.List;
 
 public class Main {
 
 	public static void main(String[] args) {
 		File file = new File("test.json");
-		try (SubbleJson json = new SubbleJson(file)) {
+		try (SubbleJson json = new SubbleJson(file, Charset.forName("UTF-8"))) {
 			JsonBuilder builder = json.getBuilder();
 			JsonParser parser = json.getParser();
 			long start = System.nanoTime();
