@@ -55,7 +55,7 @@ public final class JsonUtil {
 	}
 	
 	static boolean isNumeric(int val) {
-		return (val >= '0' && val <= '9') || val == '.';
+		return (val >= '0' && val <= '9') || val == '.' || val == 'e' || val == '-' || val == 'E';
 	}
 	
 	static boolean isString(List<Byte> byteList) {
