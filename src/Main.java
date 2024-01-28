@@ -5,7 +5,7 @@ import java.util.List;
 public class Main {
 
 	public static void main(String[] args) {
-		File file = new File("users_100.json");
+		File file = new File("test.json");
 		try (SubbleJson json = new SubbleJson(file)) {
 			JsonBuilder builder = json.getBuilder();
 			JsonParser parser = json.getParser();

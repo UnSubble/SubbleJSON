@@ -14,6 +14,12 @@ public final class JsonUtil {
 	private JsonUtil() {	
 	}
 	
+	private static boolean isNull(List<Byte> byteList) {
+		final StringBuilder sb = new StringBuilder();
+		byteList.forEach(x -> sb.append((char)x.intValue()));
+		return sb.toString().equals("null");
+	}
+	
 	static boolean equalsKeyAndList(String key, List<Byte> byteList) {
 		key = "\"" + key;
 		if (key.length() != byteList.size())
@@ -77,7 +83,9 @@ public final class JsonUtil {
 	}
 	
 	static Object getElementAsObject(List<Byte> byteList) {
-		if (isObject(byteList)) 
+		if (isNull(byteList))
+			return null;
+		else if (isObject(byteList)) 
 			return convertToObject(byteList.subList(1, byteList.size() - 1));
 		else if (isString(byteList)) 
 			return convertToString(byteList.subList(1, byteList.size() - 1));
@@ -145,7 +153,7 @@ public final class JsonUtil {
 		boolean isString = false;
 		int scope = 0;
 		String key = null;
-		Object value = null;
+		Object value = new Object();
 		for (int i = 0; i < byteList.size(); i++) {
 			byte b = byteList.get(i);
 			if (b == QUOTATION && (i == 0 || byteList.get(i - 1) != BACK_SLASH))
@@ -162,19 +170,19 @@ public final class JsonUtil {
 			}
 			if ((b == ':' || b == COMMA) && isArray == 0 && !isString && scope == 0) {
 				List<Byte> rawElement = trim(element);	
-				if (key == null && !element.isEmpty()) 
+				if (b == ':' && !rawElement.isEmpty()) 
 					key = convertToString(rawElement.subList(1, rawElement.size() - 1));
-				else
+				else if (b == COMMA) {
 					value = getElementAsObject(rawElement);
-				
+					if (key != null) {
+						object.add(key, value);
+						key = null;
+						value = null;
+					}
+				}
 				element.clear();
 			} else
 				element.add(b);
-			if (key != null && value != null) {
-				object.add(key, value);
-				key = null;
-				value = null;
-			}
 		}
 		if (!element.isEmpty() && key != null) {
 			element = trim(element);

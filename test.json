@@ -1,1 +1,41 @@
-["isim":"Ali","soyisim":"Y1lmaz","dogum_tarihi":"1990-05-15","adres":{"sehir":"0stanbul","ilce":"Kad1k￶y","posta_kodu":"34700"},"telefonlar":["555-1234","532-5678"],"email":"ali.yilmaz@example.com","aktif":true,"projeler":[{"proje_adi":"\"WebUygulamas1\"","tehlike_seviyesi":3.0,"ekibin_sorumluluklari":["frontend","backend"],"takim_uyeleri":[{"isim":"Ay_e","gorev":"frontenddeveloper"},{"isim":"Mehmet","gorev":"backenddeveloper"}]},{"proje_adi":"\"MobilUygulama\"","tehlike_seviyesi":4.0,"ekibin_sorumluluklari":["iOS","Android"],"takim_uyeleri":[{"isim":"Zeynep","gorev":"iOSdeveloper"},{"isim":"Ahmet","gorev":"Androiddeveloper"}]}]]
+[ 
+    {
+        "person": {
+                "name": "John Doe",
+                "age": 30.0,
+                "address": {
+                        "street": "123 Main Street",
+                        "city": null,
+                        "zipcode": "56789"
+                    },
+                "contacts": [ 
+                    {
+                        "type": "email",
+                        "value": "john.doe@example.com"
+                    },
+                
+                    {
+                        "type": "phone",
+                        "value": null
+                    }
+                ], 
+                "skills": [ 
+                    {
+                        "name": "Programming",
+                        "level": "Intermediate"
+                    },
+                
+                    {
+                        "name": "nullSkill",
+                        "level": null
+                    },
+                
+                    {
+                        "name": null,
+                        "level": "Advanced"
+                    }
+                ], 
+                "nullValue": null
+            }
+    }
+]

@@ -56,7 +56,8 @@ public class JsonObject {
 			Iterator<JsonPair<String, ?>> pairIter = pairs.iterator();
 			while (pairIter.hasNext()) {				
 				JsonPair<String, ?> pair = pairIter.next();
-				sb.append(pair.getKey()).append("=").append(pair.getValue().toString());
+				Object value = pair.getValue();
+				sb.append(pair.getKey()).append("=").append(value == null ? "null" : value.toString());
 				if (pairIter.hasNext())
 					sb.append(", ");
 			}
