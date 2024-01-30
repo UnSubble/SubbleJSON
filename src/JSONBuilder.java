@@ -67,25 +67,24 @@ class JsonBuilder {
 				writeKey(key);	
 			writer.append('{');
 			writer.append('\n');
-			space += 2;
 			for (int i = 0; i < keys.size(); i++) {
-				writeSpaces(space);
+				writeSpaces(space + 2);
 				String k = "\"" + keys.get(i) + "\"";
 				Object v = values.get(i);
 				if (v instanceof String) {
 					writeKey(k);
 					writeValue(v == null ? "null" : "\"" + v.toString() + "\"", i == keys.size() - 1);
 				} else if (v instanceof JsonObject) {
-					writeObject(k, (JsonObject)v, i == keys.size() - 1, space + 2);
+					writeObject(k, (JsonObject)v, i == keys.size() - 1, space + 4);
 				} else if (v instanceof List<?>)
-					writeList(k, (List<?>)v, i == keys.size() - 1, space);
+					writeList(k, (List<?>)v, i == keys.size() - 1, space + 2);
 				else  {
 					writeKey(k);
 					writeValue(v == null ? "null" : v.toString(), i == keys.size() - 1);
 				}
 				writer.append('\n');
 			}
-			writeSpaces(space - 2);
+			writeSpaces(space);
 			writer.append('}');
 			if (!isMain)
 				writer.append(',');
@@ -107,7 +106,7 @@ class JsonBuilder {
 				} else if (obj instanceof JsonObject) {
 					writer.append('\n');
 					writeSpaces(space + 4);
-					writeObject(null, (JsonObject)obj, i == list.size() - 1, space + 2);
+					writeObject(null, (JsonObject)obj, i == list.size() - 1, space + 4);
 					writer.append('\n');
 					writeSpaces(space);
 				} else if (obj instanceof List<?>) {

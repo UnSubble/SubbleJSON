@@ -34,18 +34,17 @@ public class JsonParser {
 	}
 	
 	private void skipToValue() {
-		long index = 0L;
 		int nextInt = -1;
-		try {
-			reader.mark(0);
+		try {			
 			while ((nextInt = reader.read()) != -1) {
-				if (nextInt == '\s' || nextInt == '=' /*|| nextInt == '{'*/ || nextInt == ':')
-					index++;
+				if (nextInt == '\s' || nextInt == '=' || nextInt == ':') {
+					reader.mark(1);
+				}
 				else
 					break;
 			}
 			reader.reset();
-			reader.skip(index);
+			reader.skip(0);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
