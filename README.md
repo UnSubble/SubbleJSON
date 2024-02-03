@@ -17,14 +17,11 @@ To use SubbleJson, follow these steps:
 2. **Create SubbleJson instance**:
     
 ```
-	File file = new File("example.json");
-	try (SubbleJson json = new SubbleJson(file, Charset.forName("UTF-8"))) {
-		JsonBuilder builder = json.getBuilder();     
-		JsonParser parser = json.getParser();     
-		// Your code here... 
-	} catch (IOException e) {     
-		e.printStackTrace(); 
-    }
+	Path path = Paths.get("example.json");
+	SubbleJson json = new SubbleJson(path, Charset.forName("UTF-8"))) 
+	JsonBuilder builder = json.getBuilder();     
+	JsonParser parser = json.getParser();     
+	// Your code here... 
 ```
 
 3. **Read from JSON**:
@@ -41,19 +38,7 @@ To use SubbleJson, follow these steps:
     List<?> obj = /* your data */; 
     builder.writeList(obj);
     ```
-    
-5. **Close SubbleJson instance**:
-    
-    Ensure to close the `SubbleJson` instance to release resources:
-    
-    ```
-    try (SubbleJson json = new SubbleJson(file, Charset.forName("UTF-8"))) {     
-	    // Your code here... 
-    } catch (IOException e) {     
-	    e.printStackTrace(); 
-    }
-    ```
-    
+       
 
 ## Performance
 
