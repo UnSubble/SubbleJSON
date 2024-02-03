@@ -16,7 +16,7 @@ To use SubbleJson, follow these steps:
     
 2. **Create SubbleJson instance**:
     
-```
+	```
 	File file = new File("example.json");
 	try (SubbleJson json = new SubbleJson(file, Charset.forName("UTF-8"))) {
 		JsonBuilder builder = json.getBuilder();     
@@ -24,15 +24,15 @@ To use SubbleJson, follow these steps:
 		// Your code here... 
 	} catch (IOException e) {     
 		e.printStackTrace(); 
-    }
-```
+    	}
+	```
 
 3. **Read from JSON**:
 
-```
+	```
 	Optional<List<?>> list = parser.nextList("hobbies")).get(); 
 	System.out.println(list); 
-```
+	```
     
 4. **Write to JSON**:
     
