@@ -14,43 +14,28 @@ public final class JsonUtil {
 	private JsonUtil() {	
 	}
 	
-	private static boolean isNull(List<Integer> intList) {
-		final StringBuilder sb = new StringBuilder();
-		intList.forEach(x -> sb.append((char)x.intValue()));
+	private static boolean isNull(StringBuilder sb) {
 		return sb.toString().equals("null");
 	}
 	
-	static boolean equalsKeyAndList(String key, List<Integer> intList) {
+	static boolean equalsKeyAndList(String key, String oth) {
 		key = "\"" + key;
-		if (key.length() != intList.size())
-			return false;
-		byte[] keyArray = key.getBytes();
-		for (int i = 0; i < intList.size(); i++) {
-			if (keyArray[i] != intList.get(i))
-				return false;
-		}
-		return true;
+		return key.equals(oth);
 	}
 	
-	static boolean isList(List<Integer> intList) {
-		return !intList.isEmpty() && intList.get(0) == SQUARE_BRACKET_OPEN;
+	static boolean isList(StringBuilder sb) {
+		return !sb.isEmpty() && sb.charAt(0) == SQUARE_BRACKET_OPEN;
 	}
 	
-	static boolean isObject(List<Integer> intList) {
-		return !intList.isEmpty() && intList.get(0) == CURLY_BRACKETS_OPEN;
+	static boolean isObject(StringBuilder sb) {
+		return !sb.isEmpty() && sb.charAt(0) == CURLY_BRACKETS_OPEN;
 	}
 	
-	static boolean isNum(List<Integer> intList) {
-		for (int c : intList) {
-			if (!isNumeric(c))
-				return false;
-		}
-		return true;
+	static boolean isNum(StringBuilder sb) {
+		return sb.chars().allMatch(JsonUtil::isNumeric);
 	}
 	
-	static boolean isBoolean(List<Integer> intList) {
-		final StringBuilder sb = new StringBuilder();
-		intList.forEach(x -> sb.append((char)x.intValue()));
+	static boolean isBoolean(StringBuilder sb) {
 		return sb.toString().equals("true") || sb.toString().equals("false");
 	}
 	
@@ -58,135 +43,129 @@ public final class JsonUtil {
 		return (val >= '0' && val <= '9') || val == '.' || val == 'e' || val == '-' || val == 'E';
 	}
 	
-	static boolean isString(List<Integer> intList) {
-		return !intList.isEmpty() && intList.get(0) == QUOTATION;
+	static boolean isString(StringBuilder sb) {
+		return !sb.isEmpty() && sb.charAt(0) == QUOTATION;
 	}
 	
-	static List<Integer> trim(List<Integer> intList) {
+	static String trim(String str) {
 		int startIndex = 0;
-		for (int b : intList) {
-			if (b <= 32)
+		for (char c : str.toCharArray()) {
+			if (c <= 32)
 				startIndex++;
 			else
 				break;
 		}
-		intList = intList.subList(startIndex, intList.size());
-		int end = intList.size();
+		str = str.substring(startIndex, str.length());
+		int end = str.length();
 		for (int i = end - 1; i >= 0; i--) {
-			int b = intList.get(i);
-			if (b <= 32)
+			char c = str.charAt(i);
+			if (c <= 32)
 				end--;
 			else 
 				break;
 		}
-		return intList.subList(0, end);
+		return str.substring(0, end);
 	}
 	
-	static Object getElementAsObject(List<Integer> intList) {
-		if (isNull(intList))
+	static Object getElementAsObject(StringBuilder sb) {
+		if (isNull(sb))
 			return null;
-		else if (isObject(intList)) 
-			return convertToObject(intList.subList(1, intList.size() - 1));
-		else if (isString(intList)) 
-			return convertToString(intList.subList(1, intList.size() - 1));
-		else if (isNum(intList)) 
-			return convertToNumber(intList);
-		else if (isBoolean(intList)) 
-			return convertToBoolean(intList);
-		else if (isList(intList))
-			return convertToList(intList.subList(0, intList.size() - 1));
+		else if (isObject(sb)) 
+			return convertToObject(new StringBuilder(sb.substring(0, sb.length() - 1)));
+		else if (isString(sb)) 
+			return convertToString(new StringBuilder(sb.substring(1, sb.length() - 1)));
+		else if (isNum(sb)) 
+			return convertToNumber(sb);
+		else if (isBoolean(sb)) 
+			return convertToBoolean(sb);
+		else if (isList(sb))
+			return convertToList(new StringBuilder(sb.substring(0, sb.length() - 1)));
 		return null;
 	}
 	
-	static String convertToString(List<Integer> intList) {
-		final StringBuilder sb = new StringBuilder();
-		intList.forEach(x -> sb.append((char)x.intValue()));
+	static String convertToString(StringBuilder sb) {
 		return sb.toString();
 	}
 	
-	static Number convertToNumber(List<Integer> intList) {
-		final StringBuilder sb = new StringBuilder();
-		intList.forEach(x -> sb.append((char)x.intValue()));
+	static Number convertToNumber(StringBuilder sb) {
 		return Double.parseDouble(sb.toString());
 	}
 	
-	static boolean convertToBoolean(List<Integer> intList) {
-		final StringBuilder sb = new StringBuilder();
-		intList.forEach(x -> sb.append((char)x.intValue()));
+	static boolean convertToBoolean(StringBuilder sb) {
 		return Boolean.valueOf(sb.toString());
 	}
 	
-	static List<Object> convertToList(List<Integer> intList) {
+	static List<Object> convertToList(StringBuilder sb) {
 		List<Object> list = new ArrayList<>();
-		List<Integer> element = new ArrayList<>();
+		StringBuilder element = new StringBuilder();
 		boolean isString = false;
 		int scope = 0;
-		for (int i = 1; i < intList.size(); i++) {
-			int b = intList.get(i);
-			if (b == QUOTATION && intList.get(i - 1) != BACK_SLASH)
+		for (int i = 1; i < sb.length(); i++) {
+			char c = sb.charAt(i);
+			if (c == QUOTATION && sb.charAt(i - 1) != BACK_SLASH)
 				isString = !isString;
 			if (!isString) {
-				if (b == CURLY_BRACKETS_OPEN)
+				if (c == CURLY_BRACKETS_OPEN)
 					scope++;
-				else if (b == CURLY_BRACKETS_CLOSE)
+				else if (c == CURLY_BRACKETS_CLOSE)
 					scope--;
 			}
-			if (b == COMMA && !isString && scope == 0) {
-				List<Integer> rawElement = trim(element);
-				list.add(getElementAsObject(rawElement));
-				element.clear();
+			if (c == COMMA && !isString && scope == 0) {
+				String rawElement = trim(element.toString());
+				list.add(getElementAsObject(new StringBuilder(rawElement)));
+				element = new StringBuilder();
 			} else
-				element.add(b);
+				element.append(c);
 		}
-		List<Integer> rawElement = trim(element);
+		String rawElement = trim(element.toString());
 		if (!rawElement.isEmpty()) {
-			list.add(getElementAsObject(rawElement));
+			list.add(getElementAsObject(new StringBuilder(rawElement)));
 		}
 		return list;
 	}
 	
-	static JsonObject convertToObject(List<Integer> intList) {
-		intList = trim(intList);
+	static JsonObject convertToObject(StringBuilder sb) {
+		String str = trim(sb.toString());
 		JsonObject object = new JsonObject();
-		List<Integer> element = new ArrayList<>();
+		StringBuilder element = new StringBuilder();
 		int isArray = 0;
 		boolean isString = false;
 		int scope = 0;
 		String key = null;
 		Object value = new Object();
-		for (int i = 0; i < intList.size(); i++) {
-			int b = intList.get(i);
-			if (b == QUOTATION && (i == 0 || intList.get(i - 1) != BACK_SLASH))
+		for (int i = 1; i < str.length(); i++) {
+			char c = str.charAt(i);
+			if (c == QUOTATION && (i == 0 || str.charAt(i - 1) != BACK_SLASH))
 				isString = !isString;
 			if (!isString) {
-				if (b == CURLY_BRACKETS_OPEN) 
+				if (c == CURLY_BRACKETS_OPEN) 
 					scope++;
-				if (b == CURLY_BRACKETS_CLOSE) 
+				if (c == CURLY_BRACKETS_CLOSE) 
 					scope--;
-				if (b == SQUARE_BRACKET_OPEN)
+				if (c == SQUARE_BRACKET_OPEN)
 					isArray++;
-				if (b == SQUARE_BRACKET_CLOSE)
+				if (c == SQUARE_BRACKET_CLOSE)
 					isArray--;
 			}
-			if ((b == ':' || b == COMMA) && isArray == 0 && !isString && scope == 0) {
-				List<Integer> rawElement = trim(element);	
-				if (b == ':' && !rawElement.isEmpty()) 
-					key = convertToString(rawElement.subList(1, rawElement.size() - 1));
-				else if (b == COMMA) {
-					value = getElementAsObject(rawElement);
+			if ((c == ':' || c == COMMA) && isArray == 0 && !isString && scope == 0) {
+				String rawElement = trim(element.toString());
+				if (c == ':' && !rawElement.isEmpty()) 
+					key = rawElement.substring(1, rawElement.length() - 1);
+				else if (c == COMMA) {
+					value = getElementAsObject(new StringBuilder(rawElement));
 					if (key != null) {
 						object.add(key, value);
 						key = null;
 						value = null;
 					}
 				}
-				element.clear();
+				element = new StringBuilder();
 			} else
-				element.add(b);
+				element.append(c);
 		}
 		if (!element.isEmpty() && key != null) {
-			element = trim(element);
-			value = getElementAsObject(element);
+			String rawElement = trim(element.toString());
+			value = getElementAsObject(new StringBuilder(rawElement));
 			object.add(key, value);
 		}
 		return object;
