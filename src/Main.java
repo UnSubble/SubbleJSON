@@ -9,15 +9,19 @@ public class Main {
 			JsonBuilder builder = json.getBuilder();
 			JsonParser parser = json.getParser();
 			long start = System.nanoTime();
-			Optional<List<?>> opt = parser.nextList(null);
+			Optional<List<?>> opt = parser.nextList("friends");
+			while (opt.isPresent()) {
+				System.out.println(opt.get());
+				opt = parser.nextList("friends");
+			}
 			long end = System.nanoTime();
 			System.out.println("------Reading------");
 			System.out.println((end - start) + " nanoseconds");
 			System.out.println(((end - start) / 1e6) + " milliseconds");
 			System.out.println(((end - start) / 1e9) + " seconds");
 			start = System.nanoTime();
-			builder.clearFile();
-			builder.writeList(opt.get());
+			//builder.clearFile();
+			//builder.writeList(opt.get());
 			end = System.nanoTime();
 			System.out.println();
 			System.out.println("------Writing------");

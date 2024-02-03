@@ -14,6 +14,7 @@ public class JsonParser {
 	private String jsonStr;
 	private int index;
 	private int length;
+	private StringBuilder sb;
 	
 	private JsonParser(Path path, Charset charset) {
 		try {
@@ -22,26 +23,28 @@ public class JsonParser {
 			e.printStackTrace();
 		}
 		length = jsonStr.length();
+		sb = new StringBuilder();
 	}
 	
 	protected static JsonParser getParser(Path path, Charset charset) {
 		return new JsonParser(path, charset);
 	}
 	
-	public void resetCursor() throws IOException {
+	public void reset() throws IOException {
 		index = 0;
 	}
 	
 	private void skipToValue() {		
-		for (; index < length; index++) {
+		while (index < length) {
 			char nextChar = jsonStr.charAt(index);
-			if (!(nextChar == '\s' || nextChar == '=' || nextChar == ':' || nextChar == '\n')) 
-				break;
+			if (!(nextChar <= 32 || nextChar == '=' || nextChar == ':')) 
+				return;
+			index++;
 		}
 	}
 	
-	private void jumpToStartIndexOfValue(String key) {
-		StringBuilder sb = new StringBuilder();
+	private void jumpToStartIndex(String key) {
+		sb.setLength(0);
 		boolean isCloser = true;
 		if (key.isEmpty())
 			return;
@@ -55,19 +58,21 @@ public class JsonParser {
 				if (JsonUtil.equalsKeyAndList(key, sb.toString())) {
 					index++;
 					skipToValue();
-					return;
+					break;
 				}
-				sb = new StringBuilder();
+				sb.setLength(0);;
 				continue;
 			}
 			sb.append(nextChar);
 		}
+		sb.setLength(0);
 	}
 	
-	private <T> Optional<T> getValue(String key, boolean isCloser, Predicate<StringBuilder> predicate,
-			IntPredicate intPredicate, Function<StringBuilder, T> function) {
-		StringBuilder sb = new StringBuilder();
-		jumpToStartIndexOfValue(key);
+	private <T> Optional<T> getValue(String key, boolean isCloser, Predicate<String> predicate,
+			IntPredicate intPredicate, Function<String, T> function) {
+		jumpToStartIndex(key);
+		if (!sb.isEmpty())
+			sb.setLength(0);
 		for (; index < length; index++) {
 			char nextChar = jsonStr.charAt(index);
 			if (intPredicate.test(nextChar) && (index == 0 ||
@@ -75,13 +80,13 @@ public class JsonParser {
 				isCloser = !isCloser; 
 			}
 			if (isCloser) {
-				if (predicate.test(sb)) {
-					T val = function.apply(sb);
+				if (predicate.test(sb.toString())) {
+					T val = function.apply(sb.toString());
 					index++;
 					return Optional.of(val);
 				} else {
-					jumpToStartIndexOfValue(key);
-					sb = new StringBuilder();
+					jumpToStartIndex(key);
+					sb.setLength(0);;
 				}
 			}
 			sb.append(nextChar);
@@ -90,14 +95,15 @@ public class JsonParser {
 		return Optional.empty();
 	}
 	
-	private <T> Optional<T> getBigValue(String key, Predicate<StringBuilder> predicate,
-			IntFunction<Integer> intFunction, Function<StringBuilder, T> function) {
+	private <T> Optional<T> getComplexValue(String key, Predicate<String> predicate,
+			IntFunction<Integer> intFunction, Function<String, T> function) {
 		boolean isStr = false;
 		int scope = 0;
 		if (key == null)
 			key = "";
-		StringBuilder sb = new StringBuilder();
-		jumpToStartIndexOfValue(key);
+		jumpToStartIndex(key);
+		if (!sb.isEmpty())
+			sb.setLength(0);
 		for (; index < length; index++) {
 			char nextChar = jsonStr.charAt(index);
 			if (nextChar == JsonUtil.QUOTATION && 
@@ -107,13 +113,13 @@ public class JsonParser {
 			if (!isStr) 
 				scope += intFunction.apply(nextChar);
 			if (scope == 0) {
-				if (predicate.test(sb)) {
-					T val = function.apply(sb);
+				if (predicate.test(sb.toString())) {
+					T val = function.apply(sb.toString());
 					index++;
 					return Optional.of(val);
 				} else {
-					jumpToStartIndexOfValue(key);
-					sb = new StringBuilder();
+					jumpToStartIndex(key);
+					sb.setLength(0);;
 				}
 			}
 			sb.append(nextChar);
@@ -137,12 +143,12 @@ public class JsonParser {
 	}
 
 	public Optional<List<?>> nextList(String key) {
-		return getBigValue(key, JsonUtil::isList, i -> i == JsonUtil.SQUARE_BRACKET_OPEN ? 1 :
+		return getComplexValue(key, JsonUtil::isList, i -> i == JsonUtil.SQUARE_BRACKET_OPEN ? 1 :
 			(i == JsonUtil.SQUARE_BRACKET_CLOSE ? -1 : 0), JsonUtil::convertToList);
 	}
 	
 	public Optional<JsonObject> nextObject(String key) {
-		return getBigValue(key, JsonUtil::isObject, i -> i == JsonUtil.CURLY_BRACKETS_OPEN ? 1 :
+		return getComplexValue(key, JsonUtil::isObject, i -> i == JsonUtil.CURLY_BRACKETS_OPEN ? 1 :
 			(i == JsonUtil.CURLY_BRACKETS_CLOSE ? -1 : 0), JsonUtil::convertToObject);
 	}
 	
